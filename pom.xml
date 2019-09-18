@@ -73,6 +73,73 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.30.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<dockerHost>tcp://localhost:2375</dockerHost>
+					<useColor>true</useColor>
+					<images>
+						<image>
+							<name>thymeleaf_project:%v%t</name>
+							<build>
+								<from>java:8u40</from>
+								<maintainer>trapani.tony@atos.net</maintainer>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+								<ports>
+									<port>8080</port>
+								</ports>
+								<volumes>
+									<volume>/etc/demo/external</volume>
+								</volumes>
+								<buildOptions>
+									<shmsize>2147483648</shmsize>
+								</buildOptions>
+								<runCmds>
+									<run>groupadd -r appUser</run>
+									<run>useradd -r -g appUser appUser</run>
+								</runCmds>
+								<entryPoint>
+									<exec>
+										<arg>java</arg>
+										<arg>-jar</arg>
+										<arg>/opt/demo/registration-login-thymeleaf-${project.version}.jar</arg>
+									</exec>
+								</entryPoint>
+								<assembly>
+									<mode>dir</mode>
+									<targetDir>/opt/demo</targetDir>
+									<descriptorRef>artifact-with-dependencies</descriptorRef>
+								</assembly>
+							</build>
+
+						</image>
+					</images>
+				</configuration>
+
+				<executions>
+					<execution>
+						<id>start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>build</goal>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
